@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shubham · Resume Mailer</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📧</text></svg>">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--fg:#1c2330;--mut:#667085;--bd:#d9dee7;--ac:#2563eb;--ok:#15803d;--bad:#b91c1c;--warn:#b45309}
+@media(prefers-color-scheme:dark){:root{--bg:#10141b;--card:#181e28;--fg:#e6e9ef;--mut:#9aa4b2;--bd:#2b3442;--ac:#5b8def;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 80px}
+h1{margin:0 0 4px}h2{margin:0 0 12px;font-size:18px}h3{margin:16px 0 8px;font-size:15px}
+.sub{color:var(--mut);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:16px}
+.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}.g7{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+@media(max-width:700px){.g2,.g3,.g4,.g5{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:3px}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=text],input[type=password],input[type=number],input[type=file],select,textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:7px;background:var(--bg)}
+textarea{resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+button{padding:8px 14px;border:1px solid var(--bd);border-radius:7px;background:var(--card);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--ac)}button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button.danger{border-color:var(--bad);color:var(--bad)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.metric{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px 12px}.metric b{display:block;font-size:20px}
+.table{max-height:300px;overflow:auto;border:1px solid var(--bd);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:6px 10px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}th{position:sticky;top:0;background:var(--card)}
+.s-valid{color:var(--ok)}.s-invalid{color:var(--bad)}.s-duplicate,.s-already{color:var(--warn)}
+.msg{padding:9px 12px;border-radius:7px;margin-top:8px;font-size:14px;border:1px solid var(--bd)}
+.msg.ok{border-color:var(--ok);color:var(--ok)}.msg.err{border-color:var(--bad);color:var(--bad)}.msg.warn{border-color:var(--warn);color:var(--warn)}
+.bar{height:10px;background:var(--bg);border:1px solid var(--bd);border-radius:6px;overflow:hidden}.bar>div{height:100%;width:0;background:var(--ac);transition:width .3s}
+pre#log{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px;height:260px;overflow:auto;font-size:12.5px;margin:8px 0 0;white-space:pre-wrap}
+.preview{white-space:pre-wrap;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;max-height:420px;overflow:auto}
+small,.hint{color:var(--mut);font-size:12.5px}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="row" style="justify-content:space-between;align-items:flex-start">
+  <h1 id="shubham">📧 Resume Mailer Dashboard</h1>
+  <button id="bookmarkBtn" title="Bookmark this page as Shubham">🔖 Shubham</button>
+</div>
+<div id="bmTip" class="hint hidden" style="margin:-4px 0 10px"></div>
+<p class="sub">Upload your HR list, write a short context note, preview, and send one-to-one emails from your Gmail. Keep this tab open while sending.</p>
+
+<div id="lock" class="card hidden">
+  <h2>Access key</h2>
+  <div class="row"><input type="password" id="accessKey" placeholder="Access key" style="max-width:320px"><button id="saveKey" class="primary">Unlock</button></div>
+</div>
+
+<div class="card">
+  <h2>Step 1 · Sender setup</h2>
+  <div class="row" style="margin-bottom:12px">
+    <label style="color:var(--fg);display:inline-flex;gap:6px;align-items:center"><input type="radio" name="method" value="api" checked> Gmail API (HTTPS – use this if SMTP is blocked)</label>
+    <label style="color:var(--fg);display:inline-flex;gap:6px;align-items:center"><input type="radio" name="method" value="smtp"> SMTP (App Password)</label>
+  </div>
+  <div id="apiBox">
+    <div class="row"><button id="authBtn" class="primary">Authorize with Google</button><button id="testApi">Test connection</button><span id="authState" class="hint"></span></div>
+    <div id="apiMsg"></div>
+    <small id="apiHelp"></small>
+  </div>
+  <div id="smtpBox" class="hidden">
+  <div class="grid g3">
+    <div><label>Sender Gmail address</label><input type="text" id="gmail" placeholder="you@gmail.com" autocomplete="off"></div>
+    <div><label>Gmail App Password (16 characters)</label><input type="password" id="appPw" autocomplete="new-password"><small>Kept in this tab's memory only. Never saved to disk or logged. <a href="https://support.google.com/accounts/answer/185833" target="_blank" rel="noopener">How to create one</a> (2-Step Verification must be ON).</small></div>
+    <div style="align-self:end"><button id="testLogin">Test login</button><div id="loginMsg"></div></div>
+  </div>
+  </div>
+  <h3>My profile</h3>
+  <div class="grid g4" id="profileGrid"></div>
+</div>
+
+<div class="card">
+  <h2>Step 2 · Upload</h2>
+  <div class="grid g2">
+    <div><label>HR list (.xlsx, .xls or .csv)</label><input type="file" id="hrFile" accept=".xlsx,.xls,.csv"><small>A sample is available: <a href="hr_contacts.xlsx">hr_contacts.xlsx</a></small></div>
+    <div><label>Resume PDF (optional – the bundled CV is used by default)</label><input type="file" id="resumeFile" accept=".pdf"><small id="resumeNote"></small></div>
+  </div>
+  <div id="colPick" class="grid g3 hidden" style="margin-top:12px">
+    <div><label>Email column</label><select id="emailCol"></select></div>
+    <div><label>Name column (optional)</label><select id="nameCol"></select></div>
+    <div><label>Company column (optional)</label><select id="compCol"></select></div>
+  </div>
+  <div id="uploadMsg"></div>
+  <div id="metrics" class="grid g4 hidden" style="margin-top:12px"></div>
+  <div id="tableWrap" class="table hidden" style="margin-top:12px"><table><thead><tr><th>Email</th><th>Name</th><th>Company</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table></div>
+</div>
+
+<div class="card">
+  <h2>Step 3 · Context box</h2>
+  <textarea id="context" rows="3" placeholder="e.g. Immediately available, 30 days notice, open to Noida/Gurgaon/Remote, looking for EKS/Terraform-heavy roles"></textarea>
+  <small>Inserted as its own paragraph where {context} appears. Leave empty to skip it.</small>
+  <div class="row hidden" id="polishRow" style="margin-top:8px"><button id="polishBtn">✨ Polish my context with AI</button><span id="polishMsg" class="hint"></span></div>
+</div>
+
+<div class="card">
+  <h2>Step 4 · Email template</h2>
+  <small>Placeholders: {greeting} {company} {at_company} {my_name} {role} {experience} {phone} {linkedin} {portfolio} {context} {name}</small>
+  <div style="margin-top:8px"><label>Subject</label><input type="text" id="subject"></div>
+  <div style="margin-top:8px"><label>Body</label><textarea id="body" rows="20"></textarea></div>
+  <div class="row" style="margin-top:8px"><button id="resetTpl">Reset template to default</button></div>
+  <h3>Live preview</h3>
+  <div style="max-width:520px"><label>Preview for</label><select id="prevPick"></select></div>
+  <div id="prevHead" style="margin:8px 0"></div>
+  <div id="prevBody" class="preview"></div>
+</div>
+
+<div class="card">
+  <h2>Step 5 · Send</h2>
+  <div class="grid g5">
+    <div><label>Daily limit</label><input type="number" id="dailyLimit" value="50" min="1" max="500"></div>
+    <div><label>Min delay (s)</label><input type="number" id="dMin" value="30" min="0" max="600"></div>
+    <div><label>Max delay (s)</label><input type="number" id="dMax" value="90" min="0" max="900"></div>
+    <div style="align-self:end"><label style="color:var(--fg)"><input type="checkbox" id="dry" checked> Dry run (nothing is sent)</label></div>
+    <div style="align-self:end"><label style="color:var(--fg)"><input type="checkbox" id="skipSent" checked> Skip already-sent</label></div>
+  </div>
+  <p id="summary" style="margin:12px 0 8px"></p>
+  <button id="goBtn" class="primary" style="width:100%" disabled>🧪 RUN DRY-RUN</button>
+  <div id="confirmBox" class="msg warn hidden"><span id="confirmTxt"></span> <span class="row" style="display:inline-flex;margin-left:10px"><button id="yes" class="primary">Yes, go</button><button id="no">Cancel</button></span></div>
+  <div id="errBox"></div>
+  <div id="prog" class="hidden" style="margin-top:14px">
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="row" style="justify-content:space-between;margin-top:6px"><span id="progTxt"></span><button id="stopBtn" class="danger hidden">⏹ Stop</button></div>
+    <pre id="log"></pre>
+  </div>
+  <div id="finalMsg"></div>
+  <div class="row" style="margin-top:10px"><button id="dlLog">⬇ Download sent_log.csv</button><button id="clearLog" class="danger">Clear sent log</button><small>The log is stored in this browser (localStorage), so "already sent" is remembered here.</small></div>
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const LS = {get:(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}},
+            set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+let CFG = null, rawRows = [], contacts = [], resumeB64 = "", resumeName = "", stopFlag = false, running = false;
+
+// ---------------------------------------------------------------- api
+async function api(path, body, isForm){
+  const headers = {}; const key = LS.get("rm_key","");
+  if(key) headers["X-Access-Key"] = key;
+  if(!isForm) headers["Content-Type"] = "application/json";
+  const r = await fetch(path, {method: body===undefined?"GET":"POST", headers, body: body===undefined?undefined:(isForm?body:JSON.stringify(body))});
+  let j; try{ j = await r.json(); }catch{ j = {ok:false, error:`Server error (${r.status}).`}; }
+  if(r.status===401){ $("lock").classList.remove("hidden"); }
+  if(r.status===413){ j = {ok:false, error:"File too large (max ~4 MB)."}; }
+  return j;
+}
+const msg = (el, cls, text) => { el.innerHTML = text ? `<div class="msg ${cls}"></div>` : ""; if(text) el.firstChild.textContent = text; };
+
+// ---------------------------------------------------------------- sent log (localStorage)
+const getLog = () => LS.get("rm_log", []);
+const addLog = row => { const l = getLog(); l.push(row); LS.set("rm_log", l); };
+const sentSet = () => getLog().filter(r=>r.status==="sent").map(r=>r.email);
+const today = () => new Date().toISOString().slice(0,10);
+const localDay = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`; };
+const sentToday = () => getLog().filter(r=>r.status==="sent" && localDay(r.timestamp)===localDay(new Date())).length;
+
+// ---------------------------------------------------------------- sender method (API vs SMTP)
+const method = () => document.querySelector('input[name=method]:checked').value;
+const token = () => {   // callback stores plain JSON text; LS.get already parses it once
+  let v = LS.get("rm_token", null);
+  if(typeof v === "string"){ try{ v = JSON.parse(v); }catch{ v = null; } }
+  return v && v.refresh_token ? v : null;
+};
+const senderEmail = () => method()==="api" ? ((token()||{}).email || "") : $("gmail").value.trim();
+function refreshMethod(){
+  const api = method()==="api"; $("apiBox").classList.toggle("hidden",!api); $("smtpBox").classList.toggle("hidden",api);
+  const t = token();
+  $("authState").textContent = t ? `✅ authorized${t.email?" as "+t.email:""}` : "❌ not authorized yet";
+  $("authBtn").textContent = t ? "Re-authorize with Google" : "Authorize with Google";
+  $("apiHelp").innerHTML = CFG && !CFG.oauth ? "⚠ This deployment has no GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET set yet – see README → <b>Gmail API setup</b>." : "";
+  LS.set("rm_method", method());
+}
+document.querySelectorAll('input[name=method]').forEach(r=>r.addEventListener("change",refreshMethod));
+$("authBtn").onclick = () => { location.href = "/api/oauth/start"; };
+$("testApi").onclick = async () => {
+  const t = token(); msg($("apiMsg"),"warn","Checking …");
+  const r = await api("/api/test-api",{refresh_token:t&&t.refresh_token});
+  msg($("apiMsg"), r.ok?"ok":"err", r.message || r.error);
+};
+
+// ---------------------------------------------------------------- bookmark "Shubham"
+$("bookmarkBtn").onclick = () => {
+  const mac = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+  const tip = $("bmTip"); tip.classList.remove("hidden");
+  tip.textContent = `Press ${mac ? "⌘ + D" : "Ctrl + D"} to bookmark this page – the bookmark will be named “Shubham · Resume Mailer”.`;
+  history.replaceState(null, "", "#shubham");   // a plain #shubham link jumps straight back to the top
+  window.scrollTo({top: 0, behavior: "smooth"});
+};
+if(location.hash === "#shubham") window.scrollTo(0, 0);
+
+// ---------------------------------------------------------------- init
+const PFIELDS = [["name","Name"],["role","Role"],["experience","Experience"],["phone","Phone"],["linkedin","LinkedIn"],["portfolio","Portfolio"],["email","Reply-to email"]];
+const profile = () => Object.fromEntries(PFIELDS.map(([k])=>[k,$("p_"+k).value]));
+
+async function init(){
+  CFG = await api("/api/config");
+  const saved = LS.get("rm_profile", CFG.profile);
+  $("profileGrid").innerHTML = PFIELDS.map(([k,l])=>`<div><label>${l}</label><input type="text" id="p_${k}"></div>`).join("");
+  PFIELDS.forEach(([k])=>{ $("p_"+k).value = saved[k] ?? CFG.profile[k]; $("p_"+k).addEventListener("input",()=>{LS.set("rm_profile",profile()); refreshPreview();}); });
+  $("subject").value = LS.get("rm_subject", CFG.subject); $("body").value = LS.get("rm_body", CFG.body);
+  $("gmail").value = LS.get("rm_gmail",""); $("context").value = LS.get("rm_context","");
+  $("resumeNote").textContent = CFG.has_default_resume ? "Using the bundled resume unless you upload another." : "No bundled resume – please upload a PDF.";
+  if(CFG.polish) $("polishRow").classList.remove("hidden");
+  if(CFG.locked && !LS.get("rm_key","")) $("lock").classList.remove("hidden");
+  const m = LS.get("rm_method", CFG.oauth ? "api" : "smtp");
+  document.querySelector(`input[name=method][value=${m}]`).checked = true;
+  if(new URLSearchParams(location.search).get("auth")==="ok"){ history.replaceState(null,"","/"); setTimeout(()=>msg($("apiMsg"),"ok","Authorized. You can now send."),0); }
+  refreshMethod(); refreshPreview(); refreshSummary();
+}
+
+$("saveKey").onclick = () => { LS.set("rm_key", $("accessKey").value); $("lock").classList.add("hidden"); };
+$("gmail").addEventListener("input", ()=>{ LS.set("rm_gmail",$("gmail").value); });
+
+$("testLogin").onclick = async () => {
+  $("testLogin").disabled = true; msg($("loginMsg"),"warn","Connecting to smtp.gmail.com …");
+  const r = await api("/api/test-login",{gmail:$("gmail").value,app_password:$("appPw").value});
+  msg($("loginMsg"), r.ok?"ok":"err", r.message || r.error); $("testLogin").disabled = false;
+};
+
+// ---------------------------------------------------------------- upload
+$("resumeFile").onchange = async e => {
+  const f = e.target.files[0]; resumeB64 = ""; resumeName = "";
+  if(!f){ return; }
+  if(f.size > 3*1024*1024){ $("resumeNote").textContent = "Resume must be under 3 MB."; e.target.value=""; return; }
+  const buf = new Uint8Array(await f.arrayBuffer()); let s = ""; for(let i=0;i<buf.length;i+=0x8000) s += String.fromCharCode.apply(null, buf.subarray(i,i+0x8000));
+  resumeB64 = btoa(s); resumeName = f.name; $("resumeNote").textContent = "Using uploaded resume: " + f.name;
+};
+
+$("hrFile").onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  const fd = new FormData(); fd.append("file", f);
+  msg($("uploadMsg"),"warn","Reading file …");
+  const r = await api("/api/parse", fd, true);
+  if(!r.ok){ msg($("uploadMsg"),"err",r.error); return; }
+  msg($("uploadMsg"),"",""); rawRows = r.rows;
+  for(const [id,none,det] of [["emailCol",false,r.email_col],["nameCol",true,r.name_col],["compCol",true,r.company_col]]){
+    const el = $(id); el.innerHTML = "";
+    if(none){ el.add(new Option("(none)","")); }
+    r.columns.forEach(c=>el.add(new Option(c,c)));
+    el.value = det || (none ? "" : r.columns[0]);
+    el.onchange = rebuild;
+  }
+  $("colPick").classList.remove("hidden"); rebuild();
+};
+
+async function rebuild(){
+  if(!rawRows.length) return;
+  const r = await api("/api/contacts",{rows:rawRows,email_col:$("emailCol").value,name_col:$("nameCol").value,company_col:$("compCol").value,sent:sentSet()});
+  if(!r.ok){ msg($("uploadMsg"),"err",r.error||"Could not build contacts."); return; }
+  contacts = r.contacts; renderTable(); refreshPrevList(); refreshPreview(); refreshSummary();
+}
+
+function renderTable(){
+  const counts = {}; contacts.forEach(c=>counts[c.status]=(counts[c.status]||0)+1);
+  $("metrics").innerHTML = ["valid","invalid","duplicate","already sent"].map(l=>`<div class="metric"><small>${l[0].toUpperCase()+l.slice(1)}</small><b>${counts[l]||0}</b></div>`).join("");
+  $("metrics").classList.remove("hidden"); $("tableWrap").classList.remove("hidden");
+  const tb = $("tbody"); tb.innerHTML = "";
+  contacts.forEach(c=>{ const tr = tb.insertRow(); [c.email,c.name,c.detected_company,c.status].forEach((v,i)=>{ const td = tr.insertCell(); td.textContent = v; if(i===3) td.className = "s-"+v.split(" ")[0]; }); });
+}
+
+// ---------------------------------------------------------------- context / polish
+$("context").addEventListener("input", ()=>{ LS.set("rm_context",$("context").value); refreshPreview(); });
+$("polishBtn").onclick = async () => {
+  const t = $("context").value.trim(); if(!t) return;
+  $("polishMsg").textContent = "Polishing …";
+  const r = await api("/api/polish",{text:t});
+  if(r.ok){ $("context").value = r.text; LS.set("rm_context",r.text); $("polishMsg").textContent = "Done – edit it if you like."; refreshPreview(); }
+  else $("polishMsg").textContent = "AI polish failed, keeping your text. " + (r.error||"");
+};
+
+// ---------------------------------------------------------------- template + preview
+let prevTimer;
+["subject","body"].forEach(id=>$(id).addEventListener("input",()=>{ LS.set("rm_"+id,$(id).value); clearTimeout(prevTimer); prevTimer = setTimeout(refreshPreview,300); }));
+$("resetTpl").onclick = () => { $("subject").value = CFG.subject; $("body").value = CFG.body; LS.set("rm_subject",CFG.subject); LS.set("rm_body",CFG.body); refreshPreview(); };
+$("prevPick").onchange = refreshPreview;
+
+function refreshPrevList(){
+  const rows = contacts.map((c,i)=>[i,c]).filter(([,c])=>c.status==="valid"||c.status==="already sent");
+  const sel = $("prevPick"); sel.innerHTML = "";
+  if(!rows.length){ sel.add(new Option("Sample address (upload a list to preview real contacts)","-1")); return; }
+  rows.forEach(([i,c])=>sel.add(new Option(`${c.email}  (${c.detected_company})`, i)));
+}
+async function refreshPreview(){
+  if(!CFG) return;
+  if(!$("prevPick").options.length) refreshPrevList();
+  const i = parseInt($("prevPick").value ?? "-1");
+  const contact = (i>=0 && contacts[i]) ? contacts[i] : {email:"hr@sample-company.com",name:"",company:""};
+  const r = await api("/api/preview",{profile:profile(),subject:$("subject").value,body:$("body").value,context:$("context").value.trim(),contact});
+  if(!r.ok){ $("prevHead").innerHTML = ""; $("prevBody").textContent = ""; if(r.error) msg($("prevHead"),"err",r.error); return; }
+  const att = (profile().name.trim().replace(/ /g,"_")||"My")+"_Resume.pdf";
+  $("prevHead").textContent = `To: ${contact.email}  |  Subject: ${r.subject}  |  Attachment: ${att}`;
+  $("prevBody").textContent = r.body;
+}
+
+// ---------------------------------------------------------------- send
+function eligible(){ const ok = $("skipSent").checked ? ["valid"] : ["valid","already sent"]; return contacts.filter(c=>ok.includes(c.status)); }
+function plan(){ const e = eligible(); const room = Math.max(0, (+$("dailyLimit").value||0) - sentToday()); const n = Math.min(e.length, room); return {e, room, n}; }
+function refreshSummary(){
+  const {e,n} = plan();
+  $("summary").innerHTML = `<b>${e.length}</b> emails ready · sent today: <b>${sentToday()}</b> · will send now: <b>${n}</b> · deferred by daily limit: <b>${Math.max(0,e.length-n)}</b>`;
+  $("goBtn").disabled = running || !e.length;
+  $("goBtn").textContent = $("dry").checked ? "🧪 RUN DRY-RUN" : "🚀 SEND ALL";
+}
+["dailyLimit","dry","skipSent"].forEach(id=>$(id).addEventListener("input",refreshSummary));
+
+$("goBtn").onclick = () => {
+  const {n} = plan(); const problems = [];
+  if(+$("dMin").value > +$("dMax").value) problems.push("Min delay must not be greater than max delay.");
+  if(!$("dry").checked){
+    if(method()==="api" && !(token()&&token().refresh_token)) problems.push("Click 'Authorize with Google' in Step 1 first.");
+    if(method()==="smtp" && !($("gmail").value && $("appPw").value)) problems.push("Enter your Gmail address and App Password in Step 1.");
+  }
+  if(!resumeB64 && !CFG.has_default_resume) problems.push("No resume PDF available. Upload one.");
+  if(n===0) problems.push("Nothing to send (daily limit reached or all contacts already sent).");
+  $("errBox").innerHTML = ""; problems.forEach(p=>{ const d = document.createElement("div"); d.className="msg err"; d.textContent = p; $("errBox").appendChild(d); });
+  if(problems.length) return;
+  $("confirmTxt").textContent = $("dry").checked ? `Dry run for ${n} emails – nothing will be sent.` : `Send ${n} emails from ${senderEmail()}?`;
+  $("confirmBox").classList.remove("hidden");
+};
+$("no").onclick = () => $("confirmBox").classList.add("hidden");
+$("yes").onclick = () => { $("confirmBox").classList.add("hidden"); runJob(); };
+$("stopBtn").onclick = () => { stopFlag = true; $("stopBtn").disabled = true; };
+
+const logLine = t => { const el = $("log"); el.textContent += t + "\n"; el.scrollTop = el.scrollHeight; };
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+async function runJob(){
+  const dry = $("dry").checked, {e,n} = plan(), batch = e.slice(0,n);
+  running = true; stopFlag = false; refreshSummary();
+  $("prog").classList.remove("hidden"); $("stopBtn").classList.remove("hidden"); $("stopBtn").disabled = false;
+  $("log").textContent = ""; $("finalMsg").innerHTML = "";
+  let sent = 0, failed = 0, done = 0, reason = "";
+  const upd = () => { $("barFill").style.width = (batch.length? done/batch.length*100 : 100) + "%"; $("progTxt").textContent = `${done}/${batch.length} processed · sent ${sent} · failed ${failed}`; };
+  upd();
+  const lockGuard = e => { e.preventDefault(); e.returnValue = ""; };
+  if(!dry) window.addEventListener("beforeunload", lockGuard);
+  for(let i=0;i<batch.length;i++){
+    if(stopFlag){ reason = "Stopped by you"; break; }
+    const c = batch[i];
+    const r = await api("/api/send",{method:method(),refresh_token:(token()||{}).refresh_token||"",gmail:senderEmail(),app_password:$("appPw").value,profile:profile(),subject:$("subject").value,body:$("body").value,context:$("context").value.trim(),contact:c,dry_run:dry,resume_b64:resumeB64});
+    if(r.ok){
+      sent++;
+      if(dry) logLine(`[DRY-RUN ${i+1}/${batch.length}] would send to ${c.email} | company: ${r.company||"(none)"} | subject: ${r.subject}`);
+      else { addLog({timestamp:new Date().toISOString(),email:c.email,company:r.company||"",status:"sent",error:""}); logLine(`[${i+1}/${batch.length}] SENT -> ${c.email} (${r.company||"no company"})`); }
+    } else if(r.fatal){
+      reason = r.error; logLine("STOPPING: " + r.error); break;
+    } else {
+      failed++; logLine(`[${i+1}/${batch.length}] FAILED -> ${c.email}: ${r.error}`);
+      if(!dry) addLog({timestamp:new Date().toISOString(),email:c.email,company:"",status:"failed",error:(r.error||"").slice(0,300)});
+    }
+    done = i+1; upd();
+    if(!dry && i < batch.length-1){
+      const lo = +$("dMin").value, hi = Math.max(lo, +$("dMax").value);
+      let wait = Math.round(lo + Math.random()*(hi-lo));
+      for(; wait>0 && !stopFlag; wait--){ $("progTxt").textContent = `${done}/${batch.length} processed · sent ${sent} · failed ${failed} · next email in ${wait}s`; await sleep(1000); }
+    }
+  }
+  window.removeEventListener("beforeunload", lockGuard);
+  running = false; $("stopBtn").classList.add("hidden"); upd(); logLine("Finished.");
+  const deferred = Math.max(0, e.length - batch.length), t = `${dry?"Dry run":"Sending"} finished: sent ${sent} · failed ${failed} · deferred ${deferred}`;
+  msg($("finalMsg"), reason?"warn":"ok", reason ? `${t} · stopped: ${reason}` : t);
+  await rebuild(); refreshSummary();
+}
+
+// ---------------------------------------------------------------- log download
+$("dlLog").onclick = () => {
+  const esc = v => `"${String(v??"").replace(/"/g,'""')}"`, F = ["timestamp","email","company","status","error"];
+  const csv = [F.join(",")].concat(getLog().map(r=>F.map(k=>esc(r[k])).join(","))).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = "sent_log.csv"; a.click();
+};
+$("clearLog").onclick = async () => { if(confirm("Clear the sent log stored in this browser? 'Already sent' protection will be lost.")){ LS.set("rm_log",[]); await rebuild(); refreshSummary(); } };
+
+init();
+</script>
+</body>
+</html>

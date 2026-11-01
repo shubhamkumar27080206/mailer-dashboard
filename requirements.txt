@@ -1,0 +1,6 @@
+flask>=3.0
+openpyxl>=3.1
+xlrd>=2.0.1
+certifi
+# optional: only for the "Polish my context with AI" button (also set ANTHROPIC_API_KEY in Vercel)
+# anthropic>=0.40
